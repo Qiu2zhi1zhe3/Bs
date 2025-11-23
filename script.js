@@ -84,12 +84,10 @@ function loadPreviewData() {
 }
 
 // Load dữ liệu từ file TXT
-// Hàm load data CHO PROJECT SITE
 async function loadData() {
     try {
-        // Dùng relative path đơn giản
-        const response = await fetch('data.txt' + '?t=' + new Date().getTime());
-        
+        const response = await fetch(DATA_FILE_PATH + '?t=' + new Date().getTime());
+        const text = await response.text();
         data = text.split('\n')
             .filter(line => line.trim() !== '')
             .map(line => {
