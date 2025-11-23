@@ -1,6 +1,6 @@
-// Cấu hình GitHub - CẦN SỬA LẠI THEO THÔNG TIN THỰC TẾ
-const GITHUB_USERNAME = 'qiu2zhi1zhe3'; // THAY BẰNG USERNAME THẬT
-const GITHUB_REPO = 'bs'; // THAY BẰNG TÊN REPOSITORY THẬT
+// Cấu hình GitHub CHO PROJECT SITE MỚI
+const GITHUB_USERNAME = 'qiu2zhi1zhe3'; // THAY USERNAME THẬT
+const GITHUB_REPO = 'bs';   // THAY TÊN REPO MỚI
 const DATA_FILE_PATH = 'data.txt';
 
 let data = [];
@@ -84,10 +84,11 @@ function loadPreviewData() {
 }
 
 // Load dữ liệu từ file TXT
+// Hàm load data CHO PROJECT SITE
 async function loadData() {
     try {
-        const response = await fetch(DATA_FILE_PATH + '?t=' + new Date().getTime());
-        const text = await response.text();
+        // Dùng relative path đơn giản
+        const response = await fetch('data.txt' + '?t=' + new Date().getTime());
         
         data = text.split('\n')
             .filter(line => line.trim() !== '')
