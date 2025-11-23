@@ -97,29 +97,14 @@ function loadPreviewData() {
         });
 }
 
-// Load dữ liệu từ file TXT
+// Giải pháp tạm thời - đường dẫn cứng
 async function loadData() {
     try {
-        console.log('Đang load dữ liệu...');
+        // THAY THẾ 'your-username' và 'data-search-app' bằng thông tin thật
+        const dataUrl = '/bs/data.txt'; 
         
-        // Sửa đường dẫn cho Project Site
-        let dataUrl = DATA_FILE_PATH;
-        
-        // Nếu là Project Site, cần điều chỉnh đường dẫn
-        if (IS_PROJECT_SITE && !window.location.href.includes('/' + DATA_FILE_PATH)) {
-            dataUrl = `/${GITHUB_REPO}/${DATA_FILE_PATH}`;
-        }
-        
-        console.log('Data URL:', dataUrl);
-        
-        const response = await fetch(dataUrl + '?t=' + new Date().getTime());
-        
-        if (!response.ok) {
-            throw new Error(`Không thể tải file: ${response.status} ${response.statusText}`);
-        }
-        
-        const text = await response.text();
-        console.log('Dữ liệu nhận được:', text.substring(0, 100) + '...');
+        console.log('Loading from:', dataUrl);
+        const response = await fetch(dataUrl + '?t=' + new Date().
         
         data = text.split('\n')
             .filter(line => line.trim() !== '')
@@ -145,8 +130,7 @@ async function loadData() {
         console.log('Sample data:', data.slice(0, 3));
         
     } catch (error) {
-        console.error('Lỗi khi load dữ liệu:', error);
-        showMessage('Lỗi khi tải dữ liệu: ' + error.message, 'error');
+        console.error('Error:', error);
     }
 }
 
