@@ -68,33 +68,59 @@ function loadPreviewData() {
     const previewContent = document.getElementById('dataPreview');
     previewContent.innerHTML = 'Đang tải dữ liệu...';
     
-    fetch(DATA_FILE_PATH + '?t=' + new Date().getTime())
-        .then(response => response.text())
+    let dataUrl = DATA_FILE_PATH;
+    if (IS_PROJECT_SITE && !window.location.href.includes('/' + DATA_FILE_PATH)) {
+        dataUrl = `/${GITHUB_REPO}/${DATA_FILE_PATH}`;
+    }
+    
+    console.log('Preview data URL:', dataUrl);
+    
+    fetch(dataUrl + '?t=' + new Date().getTime())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.text();
+        })
         .then(text => {
             const lines = text.split('\n').filter(line => line.trim() !== '');
             if (lines.length === 0) {
                 previewContent.innerHTML = 'Chưa có dữ liệu';
             } else {
                 previewContent.innerHTML = lines.join('<br>');
+                console.log('Preview loaded:', lines.length, 'lines');
             }
         })
         .catch(error => {
             previewContent.innerHTML = 'Lỗi khi tải dữ liệu: ' + error.message;
+            console.error('Preview error:', error);
         });
 }
 
 // Load dữ liệu từ file TXT
 async function loadData() {
     try {
-        // Sử dụng relative path cho Project Site
-        const dataUrl = IS_PROJECT_SITE ? `/${GITHUB_REPO}/${DATA_FILE_PATH}` : `/${DATA_FILE_PATH}`;
+        console.log('Đang load dữ liệu...');
+        
+        // Sửa đường dẫn cho Project Site
+        let dataUrl = DATA_FILE_PATH;
+        
+        // Nếu là Project Site, cần điều chỉnh đường dẫn
+        if (IS_PROJECT_SITE && !window.location.href.includes('/' + DATA_FILE_PATH)) {
+            dataUrl = `/${GITHUB_REPO}/${DATA_FILE_PATH}`;
+        }
+        
+        console.log('Data URL:', dataUrl);
+        
         const response = await fetch(dataUrl + '?t=' + new Date().getTime());
         
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error(`Không thể tải file: ${response.status} ${response.statusText}`);
         }
         
         const text = await response.text();
+        console.log('Dữ liệu nhận được:', text.substring(0, 100) + '...');
+        
         data = text.split('\n')
             .filter(line => line.trim() !== '')
             .map(line => {
@@ -102,9 +128,9 @@ async function loadData() {
                 if (parts.length >= 3) {
                     return {
                         fullText: line.trim(),
-                        ch: parts[0], // CH
-                        bs: parts[1].split(' ').map(bs => bs.trim()).filter(bs => bs !== ''), // BS (cách nhau bằng dấu cách)
-                        more: parts.slice(2).join('.') // More
+                        ch: parts[0],
+                        bs: parts[1].split(' ').map(bs => bs.trim()).filter(bs => bs !== ''),
+                        more: parts.slice(2).join('.')
                     };
                 }
                 return {
@@ -116,7 +142,9 @@ async function loadData() {
             });
         
         console.log('Đã load', data.length, 'dòng dữ liệu');
-     } catch (error) {
+        console.log('Sample data:', data.slice(0, 3));
+        
+    } catch (error) {
         console.error('Lỗi khi load dữ liệu:', error);
         showMessage('Lỗi khi tải dữ liệu: ' + error.message, 'error');
     }
@@ -129,6 +157,9 @@ function searchData() {
     const noResults = document.getElementById('noResults');
     const resultCount = document.getElementById('resultCount');
     
+    console.log('Searching for:', searchTerm);
+    console.log('Available data:', data.length, 'items');
+    
     resultsContainer.innerHTML = '';
     
     if (searchTerm === '') {
@@ -137,14 +168,25 @@ function searchData() {
         return;
     }
     
+    // Debug: hiển thị tất cả dữ liệu
+    console.log('All data:', data);
+    
     const filteredData = data.filter(item => {
         const searchInFullText = item.fullText.toLowerCase().includes(searchTerm);
         const searchInCH = item.ch.toLowerCase().includes(searchTerm);
         const searchInBS = item.bs.some(bs => bs.toLowerCase().includes(searchTerm));
         const searchInMore = item.more.toLowerCase().includes(searchTerm);
         
-        return searchInFullText || searchInCH || searchInBS || searchInMore;
+        const found = searchInFullText || searchInCH || searchInBS || searchInMore;
+        
+        if (found) {
+            console.log('Found match:', item.fullText);
+        }
+        
+        return found;
     });
+    
+    console.log('Filtered results:', filteredData.length);
     
     if (filteredData.length > 0) {
         filteredData.forEach(item => {
@@ -165,7 +207,12 @@ function searchData() {
     } else {
         noResults.style.display = 'block';
         resultCount.textContent = '0 kết quả';
+        console.log('No results found for:', searchTerm);
+        console.log('Available data samples:', data.slice(0, 3));
     }
+    
+    // Gọi debug
+    debugSearch();
 }
 
 // Hàm thêm dữ liệu mới với logic gộp CH và xóa BS trùng
@@ -507,3 +554,23 @@ window.addEventListener('DOMContentLoaded', function() {
     openTab('searchTab');
     debugConfig(); // Thêm dòng này
 });
+// Hàm debug để kiểm tra dữ liệu
+function debugSearch() {
+    const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+    console.log('=== DEBUG SEARCH ===');
+    console.log('Search term:', searchTerm);
+    console.log('Total data:', data.length);
+    console.log('Data sample:', data.slice(0, 3));
+    
+    if (searchTerm) {
+        const results = data.filter(item => {
+            return item.fullText.toLowerCase().includes(searchTerm) ||
+                   item.ch.toLowerCase().includes(searchTerm) ||
+                   item.bs.some(bs => bs.toLowerCase().includes(searchTerm)) ||
+                   item.more.toLowerCase().includes(searchTerm);
+        });
+        console.log('Found results:', results.length);
+        console.log('Results:', results);
+    }
+    console.log('==================');
+}
