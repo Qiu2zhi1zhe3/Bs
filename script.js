@@ -115,7 +115,7 @@ function loadPreviewData() {
 async function loadData() {
     try {
         // Sử dụng relative path cho Project Site
-        const dataUrl = IS_PROJECT_SITE ? `/${GITHUB_REPO}/${DATA_FILE_PATH}` : `/${DATA_FILE_PATH}`;
+        const dataUrl = DATA_FILE_PATH;
         const response = await fetch(dataUrl + '?t=' + new Date().getTime());
         
         if (!response.ok) {
