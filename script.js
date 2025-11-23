@@ -1,7 +1,35 @@
-// Cấu hình GitHub - CẦN SỬA LẠI THEO THÔNG TIN THỰC TẾ
-const GITHUB_USERNAME = 'qiu2zhi1zhe3'; // THAY BẰNG USERNAME THẬT
-const GITHUB_REPO = 'bs'; // THAY BẰNG TÊN REPOSITORY THẬT
+// Cấu hình GitHub cho Project Site
+function getGitHubConfig() {
+    const currentUrl = window.location.href;
+    
+    // Detect tự động từ URL
+    if (currentUrl.includes('.github.io/')) {
+        // Project site: https://username.github.io/repo-name/
+        const match = currentUrl.match(/https?:\/\/([^.]+)\.github\.io\/([^/]+)/);
+        if (match && match[1] && match[2]) {
+            return {
+                username: match[1],
+                repo: match[2],
+                isProjectSite: true
+            };
+        }
+    }
+    
+    // Fallback - THAY BẰNG THÔNG TIN THẬT CỦA BẠN
+    return {
+        username: 'qiu2zhi1zhe3', // THAY USERNAME THẬT
+        repo: 'bs',   // THAY TÊN REPO THẬT
+        isProjectSite: true
+    };
+}
+
+const GITHUB_CONFIG = getGitHubConfig();
+const GITHUB_USERNAME = GITHUB_CONFIG.username;
+const GITHUB_REPO = GITHUB_CONFIG.repo;
+const IS_PROJECT_SITE = GITHUB_CONFIG.isProjectSite;
 const DATA_FILE_PATH = 'data.txt';
+
+console.log('GitHub Config:', GITHUB_CONFIG);
 
 let data = [];
 let githubToken = localStorage.getItem('githubToken');
